@@ -1,6 +1,6 @@
 import sys
 from enum import IntEnum
-from typing import Dict, List
+from typing import Dict, Iterable, List
 
 from gitstack.exceptions import GitStackException
 from gitstack.git import GitInterface
@@ -44,22 +44,20 @@ def validate_arguments(args: List[str], lower: int=None, upper: int=None,
                        message: str='') -> None:
     numargs: int = len(args)
 
-    if lower is None and upper is None:
+    if not lower and not upper:
         return
 
-    exception = GitStackException(message)
-    limits: Iterable[int] = range(
-            upper if lower is None else lower, 
-            (lower if upper is None else upper) + 1
-            )
+    within_limits: bool = any([
+        lower and lower <= numargs,
+        upper and numargs > upper
+        ])
 
-    if numargs not in limits:
-        raise exception
+    if not within_limits:
+        raise GitStackException(message)
 
 with stack:
     if cmd == Commands.SHOW:
         validate_arguments(args, 0, message='usage: gitstack show')
-        print(stack.show())
 
     elif cmd == Commands.ADD:
         validate_arguments(args, 0, 1, message='usage: gitstack add [name]')
@@ -85,3 +83,5 @@ with stack:
         except ValueError:
             raise GitStackException('required integer index')
         stack.select(index)
+
+    print(stack.show())
