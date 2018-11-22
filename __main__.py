@@ -49,7 +49,7 @@ def validate_arguments(args: List[str], lower: int=None, upper: int=None,
 
     within_limits: bool = any([
         lower and lower <= numargs,
-        upper and numargs > upper
+        upper and upper >= numargs
         ])
 
     if not within_limits:
@@ -67,12 +67,13 @@ with stack:
             stack.add_current()
 
     elif cmd == Commands.DROP:
-        validate_arguments(args, 0, 1, 'usage: gitstack drop [name]')
+        validate_arguments(args, 0, 1, 'usage: gitstack drop [index]')
         if len(args):
             try:
                 index = int(args[0])
             except ValueError:
                 raise GitStackException('required integer index')
+            stack.drop(index)
         else:
             stack.drop_current()
 
